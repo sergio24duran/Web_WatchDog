@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Controlar LED</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin-top: 50px;
+      }
+      button {
+        font-size: 20px;
+        padding: 10px 20px;
+        cursor: pointer;
+      }
+      input {
+        font-size: 30px;
+        margin-top: 20px;
+        text-align: center;
+        width: 100px;
+        padding: 10px;
+      }
+    </style>
+    <!-- Incluir Firebase SDK de forma tradicional -->
+    <script defer src="https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/11.0.2/firebase-database-compat.js"></script>
+  </head>
+  <body>
+    <h1>Control del LED 18 del ESP32</h1>
+    <button onclick="toggleValue()">Cambiar Valor</button>
+    <!-- Caja de texto para ver el valor de 'Led18' -->
+    <input type="text" id="valueDisplay" disabled />
+
+    <script>
+      // Esperamos a que la página y los scripts estén completamente cargados
+      window.onload = () => {
+        // Inicializa Firebase
+        const firebaseConfig = {
+          apiKey: "AIzaSyCN3H3lcZf6mqejcxHoBsADd2Xu_LuPM60", // Reemplaza con tu API Key
+          authDomain: "esp32-watchdog.firebaseapp.com",  // Reemplaza con tu Auth Domain
+          databaseURL: "https://esp32-watchdog-default-rtdb.europe-west1.firebasedatabase.app",  // URL de tu base de datos
+          projectId: "esp32-watchdog",
+          storageBucket: "esp32-watchdog.appspot.com",
+          messagingSenderId: "326162038959",  // Reemplaza con tu Messaging Sender ID
+          appId: "1:326162038959:web:b9f25d8b1569c7f894d45a", // Reemplaza con tu App ID
+        };
+
+        // Inicializa Firebase solo una vez
+        if (typeof firebase !== 'undefined') {
+          firebase.initializeApp(firebaseConfig);
+
+          // Referencia al nodo 'Led18' en la base de datos
+          const valueRef = firebase.database().ref('Led18');
+
+          // Escuchar cambios en el valor de 'Led18' y mostrarlo en la caja de texto
+          valueRef.on('value', (snapshot) => {
+            const value = snapshot.val(); // Obtiene el valor de 'Led18'
+            document.getElementById('valueDisplay').value = value; // Muestra el valor en la caja de texto
+          });
+
+          // Función para cambiar el valor de 'Led18'
+          window.toggleValue = () => {
+            valueRef.once('value').then((snapshot) => {
+              const currentValue = snapshot.val(); // Obtiene el valor actual de 'Led18'
+              const newValue = currentValue === 0 ? 1 : 0; // Alterna entre 0 y 1
+              valueRef.set(newValue); // Actualiza el valor en la base de datos
+            });
+          };
+        } else {
+          console.error('Firebase no se cargó correctamente');
+        }
+      };
+    </script>
+  </body>
+</html>
